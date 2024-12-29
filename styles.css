@@ -1,0 +1,279 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: #5D4037; /* Warm brown text color */
+  background-color: #FCF3F3; /* Soft white background */
+  line-height: 1.6;
+  padding: 0 15px;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+body.loaded{
+    opacity: 1;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #FDEDEC; /* Warm light red */
+  border-bottom: 3px solid #E74C3C; /* Cozy red border */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+header .logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #E74C3C; /* Cozy red */
+}
+
+header nav ul {
+  display: flex;
+  list-style: none;
+}
+
+header nav ul li {
+  margin-left: 20px;
+}
+
+header nav ul li a {
+  text-decoration: none;
+  color: #E74C3C; /* Cozy red links */
+  font-size: 16px;
+  font-weight: bold;
+  padding: 5px 10px;
+  transition: background 0.3s, color 0.3s;
+  border-radius: 5px;
+}
+
+header nav ul li a:hover {
+  background-color: #E74C3C; /* Rich red hover background */
+  color: #FFFFFF; /* White text on hover */
+}
+
+/* Updated Button Style */
+.button {
+  width: 110px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  background-color: #E74C3C; /* Cozy red */
+  border-radius: 30px;
+  color: #FCF3F3; /* Soft white text */
+  font-weight: 600;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition-duration: 0.5s;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
+  padding-left: 8px;
+}
+
+.svgIcon {
+  height: 25px;
+  transition: transform 1.5s;
+}
+
+.bell path {
+  fill: #FCF3F3; /* Soft white icon color */
+}
+
+.button:hover {
+  background-color: #C0392B; /* Darker red on hover */
+}
+
+.button:active {
+  transform: scale(0.97);
+  transition-duration: 0.2s;
+}
+
+.button:hover .svgIcon {
+  transform: rotate(250deg);
+}
+
+/* Updated Hamburger Menu Button */
+.hamburger {
+  height: 50px;
+  width: 50px;
+  position: relative;
+  display: none; /* Hide it by default on larger screens */
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger .checkbox {
+  position: absolute;
+  opacity: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  z-index: 2; /* Ensures it’s clickable */
+}
+
+.line {
+  transition: 0.5s ease;
+  stroke-width: 6px;
+  stroke: black; /* Default color for lines */
+}
+
+.lineTop {
+  stroke-dasharray: 40 40;
+  stroke-dashoffset: 25;
+}
+
+.lineMid {
+  stroke-dasharray: 40 40;
+}
+
+.lineBottom {
+  stroke-dasharray: 40 40;
+  stroke-dashoffset: 60;
+}
+
+/* Checkbox toggled - Active state */
+.hamburger .checkbox:checked + svg .line {
+  stroke: crimson; /* Color for active lines */
+}
+
+.hamburger .checkbox:checked + svg .lineTop {
+  stroke-dashoffset: 0;
+  transform-origin: left;
+  transform: rotateZ(45deg) translate(-7px, -5px);
+}
+
+.hamburger .checkbox:checked + svg .lineMid {
+  stroke-dashoffset: 40;
+}
+
+.hamburger .checkbox:checked + svg .lineBottom {
+  stroke-dashoffset: 0;
+  transform-origin: left;
+  transform: rotateZ(-45deg) translate(-5px, 5px);
+}
+
+/* Mobile Menu Behavior */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block; /* Show hamburger button on mobile screens */
+    margin-left: auto;
+  }
+
+  nav {
+    opacity: 0;
+    visibility: hidden; /* Hidden by default */
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 123px;
+    left: 0;
+    right: 0;
+    background: #FDEDEC; /* Match header background */
+    border-top: 1px solid #E74C3C;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.5s ease, visibility 0s 0.5s; /* Transition opacity and visibility */
+  }
+
+  nav.active {
+    opacity: 1;
+    visibility: visible; /* Make visible when active */
+    transition: opacity 0.5s ease, visibility 0s 0s; /* Immediate visibility change */
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav ul li {
+    margin: 10px 0;
+  }
+}
+
+/* Hero Section */
+.hero {
+  justify-content: center;
+  background-image: url("/logo.png"); /* Correct relative path to the logo */
+  background-size: contain; /* Scales the image to fit inside the container */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+  background-position: center; /* Centers the image */
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #FDEDEC, #FCF3F3); /* Retain gradient for the background */
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers button horizontally */
+  justify-content: center; /* Centers button vertically */
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #E74C3C; /* Cozy red */
+}
+
+/* Highlights Section */
+.highlights {
+  padding: 40px 20px;
+  background: #FFFFFF;
+  text-align: center;
+}
+
+.highlights h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #E74C3C;
+}
+
+.highlights ul {
+  list-style: none;
+}
+
+.highlights ul li {
+  font-size: 18px;
+  margin: 10px 0;
+  color: #5D4037;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #FDEDEC;
+  border-top: 3px solid #E74C3C;
+  box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+footer ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+footer ul li {
+  margin: 0 10px;
+}
+
+footer ul li a {
+  text-decoration: none;
+  color: #E74C3C;
+  font-size: 14px;
+}
+
+footer ul li a:hover {
+  color: #C0392B;
+}

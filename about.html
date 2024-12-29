@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>about us</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="logo">
+        <img src="logo.png" height="50" width="50" alt="logo"><h6>tradeNOM</h6></img>
+        
+    </div>
+    
+    <!-- Hamburger Menu Icon -->
+    <div class="hamburger">
+      <input class="checkbox" type="checkbox" id="menu-toggle" />
+      <svg fill="none" viewBox="0 0 50 50" height="50" width="50">
+        <path class="lineTop line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 11L44 11"></path>
+        <path class="lineMid line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 24H43"></path>
+        <path class="lineBottom line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 37H43"></path>
+      </svg>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav id="nav-menu">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Games</a></li>
+        <li><a href="#">Community</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><button class="button">Login</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>About us</h1>
+    <br>
+    <br>
+    
+
+<h2>What is TradeNOM?</h2>
+
+<h3>Effortless in-game trading made easy.</h3>
+
+TradeNOM is the place where gamers can easily trade in-game items, whether it’s rare skins, weapons, or other loot you’re looking to swap. The idea is to create a simple, easy-to-use platform that lets you connect with other players to make trades, buy, or sell in-game items without the usual hassle. No more scrolling through endless threads or dealing with unreliable trades—just straightforward connections with people who want to deal.
+
+<h2>Who Are We?</h2>
+
+<h3>Two gamers, one vision, and a lot of ambition.</h3>
+
+<b>Capy</b> - the owner of TradeNOM, is the outgoing, funny guy who keeps the platform running smoothly. While he’s the face of TradeNOM—dealing with the community, answering messages, and being the social butterfly—he’s also the one who came up with the idea for the platform in the first place.
+<br>
+<br>
+
+<b>Neo (that’s me)</b>- the one behind all the code that makes TradeNOM work. I’m an 8th grader with ADHD, and while talking to people isn't exactly my thing, I’m really passionate about building things. I like to hide behind the code and let Capy handle the social side. Together, we balance each other out: Capy brings the energy and ideas, while I work on the tech to make everything run smoothly.
+
+<h2>Our Story</h2>
+
+<h3>From a random idea to a real platform.</h3>
+
+The story of TradeNOM is simple: one day, I was bored and messaged Capy with a question: “What if we made a platform for gamers to trade in-game items?” I didn’t have a huge plan or anything, I was just looking for something to do. Capy thought it was a great idea, and we decided to make it happen.
+
+While Capy was all in with handling the community and pushing the idea forward, I took care of the technical side—coding and bringing the platform to life. It was a great way to combine both of our strengths. Capy’s vision and social skills and my passion for programming. What started as a simple, random idea has now turned into TradeNOM, and we’re both excited to see where it goes from here!
+
+<h2>Join Us</h2>
+
+<h3>Ready to start trading?</h3>
+
+If you’re looking to trade in-game items, TradeNOM is your spot. Sign up, find other gamers to connect with, and start making those trades. Whether you’re a beginner or a pro, we’re here to help level up your game!
+    
+    
+  <footer>
+    <p>© 2024 TradeNOM - All Rights Reserved</p>
+    <ul>
+      <li><a href="ToS.html">Terms of Service</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+  </footer>
+
+  
+  <script>
+  // Add fade-in effect when the page is loaded
+  window.addEventListener('load', function () {
+    document.body.classList.add('loaded');
+  });
+
+  // Handle fading out when navigating to a new page
+  document.querySelectorAll('a').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const href = this.getAttribute('href');
+      
+      // Fade out
+      document.body.style.opacity = 0;
+
+      // Wait for the fade-out to complete, then navigate to the new page
+      setTimeout(function() {
+        window.location.href = href;
+      }, 1000); // Match the fade-out duration (1s)
+    });
+  });
+    // Toggle the visibility of the menu when the hamburger menu is clicked
+document.getElementById("menu-toggle").addEventListener("change", function() {
+  const menu = document.getElementById("nav-menu");
+  // When the checkbox is checked, show the menu
+  if (this.checked) {
+    menu.classList.add("active");
+  } else {
+    menu.classList.remove("active");
+  }
+});
+  </script>
+  
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>about us</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="logo">
+        <img src="logo.png" height="50" width="50" alt="logo"><h6>tradeNOM</h6></img>
+        
+    </div>
+    
+    <!-- Hamburger Menu Icon -->
+    <div class="hamburger">
+      <input class="checkbox" type="checkbox" id="menu-toggle" />
+      <svg fill="none" viewBox="0 0 50 50" height="50" width="50">
+        <path class="lineTop line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 11L44 11"></path>
+        <path class="lineMid line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 24H43"></path>
+        <path class="lineBottom line" stroke-linecap="round" stroke-width="4" stroke="black" d="M6 37H43"></path>
+      </svg>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav id="nav-menu">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Games</a></li>
+        <li><a href="#">Community</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><button class="button">Login</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Trade Smarter, Game Harder</h1>
+    <br>
+    <h2>use tradeNOM</h2>
+    <br>
+<br>
+
+    <button class="button">
+      <svg class="svgIcon" viewBox="0 0 512 512" height="1em" xmlns="http://www.w3.org/2000/svg">
+       <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path>
+      </svg>
+      Explore
+    </button>
+  </section>
+
+  <!-- Highlights Section -->
+  <section class="highlights">
+    <h2>Why Choose Us?</h2>
+    <ul>
+      <li>Trade in over 50+ games!</li>
+      <li>Secure transactions & trusted community.</li>
+      <li>Find matches tailored to your gaming style.</li>
+    </ul>
+  </section>
+
+  <!-- Footer Section -->
+  <footer>
+    <p>© 2024 TradeNOM - All Rights Reserved</p>
+    <ul>
+      <li><a href="ToS.html">Terms of Service</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+  </footer>
+
+  <script>
+  // Add fade-in effect when the page is loaded
+  window.addEventListener('load', function () {
+    document.body.classList.add('loaded');
+  });
+
+  // Handle fading out when navigating to a new page
+  document.querySelectorAll('a').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const href = this.getAttribute('href');
+      
+      // Fade out
+      document.body.style.opacity = 0;
+
+      // Wait for the fade-out to complete, then navigate to the new page
+      setTimeout(function() {
+        window.location.href = href;
+      }, 1000); // Match the fade-out duration (1s)
+    });
+  });
+    // Toggle the visibility of the menu when the hamburger menu is clicked
+document.getElementById("menu-toggle").addEventListener("change", function() {
+  const menu = document.getElementById("nav-menu");
+  // When the checkbox is checked, show the menu
+  if (this.checked) {
+    menu.classList.add("active");
+  } else {
+    menu.classList.remove("active");
+  }
+});
+  </script>
+  
+</body>
+</html>
