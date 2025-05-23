@@ -1,53 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Discord Bot Message Setter</title>
-</head>
-<body>
-  <h2>Set Respond Message for Your Server</h2>
-  <a href="https://discord.com/oauth2/authorize?client_id=1324052462360858694">add the bot</a>
-  <br>
-  <label>Server ID:</label><br />
-  <input type="text" id="guildId" placeholder="Enter your Discord Server ID" style="width: 300px;" /><br /><br />
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Discord Bot Message Setter</title>
+  </head>
+  <body>
+    <h2>Set Respond Message for Your Server</h2>
+    <a href="https://discord.com/oauth2/authorize?client_id=1324052462360858694">add the bot</a>
+    <br>
+    <label>Server ID:</label><br />
+    <input type="text" id="guildId" placeholder="Enter your Discord Server ID" style="width: 300px;" /><br /><br />
 
-  <label>Message:</label><br />
-  <input type="text" id="message" placeholder="Enter the message" style="width: 300px;" /><br /><br />
+    <label>Message:</label><br />
+    <input type="text" id="message" placeholder="Enter the message" style="width: 300px;" /><br /><br />
 
-  <button onclick="setMessage()">Set Message</button>
+    <button onclick="setMessage()">Set Message</button>
 
-  <p id="response"></p>
+    <p id="response"></p>
 
-  <script>
-    async function setMessage() {
-      const guildId = document.getElementById('guildId').value.trim();
-      const message = document.getElementById('message').value.trim();
+    <script>
+      async function setMessage() {
+        const guildId = document.getElementById('guildId').value.trim();
+        const message = document.getElementById('message').value.trim();
 
-      if (!guildId || !message) {
-        alert('Please enter both Server ID and Message');
-        return;
-      }
-        //http://us3.bot-hosting.net:20128/config/${guildId}
-      try {
-        const response = await fetch(`https://bot-proxy.takeiteasy-decent.workers.dev/${guildId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ respond_message: message }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          document.getElementById('response').innerText = `✅ Success! Message set to: "${message}"`;
-        } else {
-          document.getElementById('response').innerText = `❌ Error: ${data.error || 'Unknown error'}`;
+        if (!guildId || !message) {
+          alert('Please enter both Server ID and Message');
+          return;
         }
-      } catch (error) {
-        document.getElementById('response').innerText = `⚠️ Fetch error: ${error.message}`;
+          //http://us3.bot-hosting.net:20128/config/${guildId}
+        try {
+          const response = await fetch(`http://us3.bot-hosting.net:20128/config/${guildId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ respond_message: message }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById('response').innerText = `✅ Success! Message set to: "${message}"`;
+          } else {
+            document.getElementById('response').innerText = `❌ Error: ${data.error || 'Unknown error'}`;
+          }
+        } catch (error) {
+          document.getElementById('response').innerText = `⚠️ Fetch error: ${error.message}`;
+        }
       }
-    }
-  </script>
-</body>
-</html>
+    </script>
+  </body>
+  </html>
