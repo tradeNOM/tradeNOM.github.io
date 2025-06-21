@@ -8,21 +8,102 @@
   <script async src="https://js.stripe.com/v3/buy-button.js"></script>
   <style>
     body { font-family: sans-serif; margin: 0; color: white; background: #000b19; }
-    header { text-align: center; padding: 20px; }
+    header { text-align: center; padding: 20px; position: relative; }
     .category-card, .product-card { background: #111; margin: 10px; padding: 10px; cursor: pointer; border-radius: 8px; text-align: center; }
     .product-card img { max-width: 100px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); overflow: auto; z-index: 10; }
-    .modal-content { margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; background: #111; border-radius: 8px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); overflow: auto; z-index: 20; }
+    .modal-content { margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; background: #111; border-radius: 8px; color: white; }
     .close { float: right; font-size: 28px; cursor: pointer; }
-    .cart-panel { position: fixed; right: 0; top: 100px; width: 300px; background: #111; color: white; padding: 15px; border-left: 2px solid #444; z-index: 1000; }
-    .cart-panel input, .cart-panel button { width: 100%; padding: 10px; margin-top: 10px; }
     .modal-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    button#toggle-cart {
+      margin-top: 10px;
+      padding: 10px 16px;
+      font-size: 16px;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+    }
+
+    .cart-panel {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 300px;
+      height: 100%;
+      background: #111;
+      color: white;
+      padding: 20px;
+      box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+      transition: right 0.3s ease-in-out;
+      z-index: 1000;
+      border-radius: 12px 0 0 12px;
+      overflow-y: auto;
+    }
+    .cart-panel.open {
+      right: 0;
+    }
+    .cart-panel input, .cart-panel button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+    }
+    .cart-panel button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .cart-panel h2, .cart-panel p {
+      margin: 10px 0;
+    }
+
+    /* Quantity slider styles */
+    #quantity-slider {
+      width: 100%;
+      margin-top: 10px;
+      -webkit-appearance: none;
+      background: #333;
+      height: 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #quantity-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #007bff;
+      cursor: pointer;
+      margin-top: -6px;
+    }
+    #quantity-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #007bff;
+      cursor: pointer;
+    }
+
+    #quantity-display {
+      margin-top: 8px;
+      font-weight: bold;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Frozone Store</h1>
     <h3>Your #1 Source for Axes</h3>
+    <button id="toggle-cart">🛒 View Cart</button>
   </header>
 
   <section class="categories" id="category-list"></section>
@@ -32,7 +113,7 @@
     <div id="cart-items"></div>
     <input type="text" id="discount-code" placeholder="Discount Code" />
     <button id="apply-discount">Apply Discount</button>
-    <p id="discount-message" style="color: lightgreen; margin-top: 5px;"></p>
+    <p id="discount-message" style="color: lightgreen;"></p>
     <p>Total: <strong id="cart-total">0</strong></p>
     <input type="text" id="roblox-username" placeholder="Your Roblox Username" required />
     <button id="submit-order">Submit Order</button>
@@ -42,19 +123,40 @@
     <div class="modal-content">
       <span id="modal-close" class="close">&times;</span>
       <h2 id="modal-title"></h2>
-      <div id="modal-products" class="modal-products"></div>
-      <div id="modal-product-detail" style="display:none;">
-        <button id="back-to-products">← Back to products</button>
+
+      <!-- Shop start modal -->
+      <div id="start-modal" style="text-align:center; margin-top: 40px;">
+        <p>Welcome to Frozone Store! Press the button below to start shopping and enjoy some chill music.</p>
+        <button id="start-shop" style="padding:12px 24px; font-size: 18px; border-radius: 8px; background:#007bff; color:white; border:none; cursor:pointer;">Start Shopping</button>
+      </div>
+
+      <!-- Products grid -->
+      <div id="modal-products" class="modal-products" style="display:none;"></div>
+
+      <!-- Product detail -->
+      <div id="modal-product-detail" style="display:none; color: white;">
+        <button id="back-to-products" style="background:#444; border:none; color:white; padding:6px 12px; border-radius:6px; cursor:pointer;">← Back to products</button>
         <h3 id="detail-name"></h3>
-        <img id="detail-image" src="" alt="" style="max-width:100%;" />
+        <img id="detail-image" src="" alt="" style="max-width:100%; border-radius: 8px;" />
         <p><strong>Price:</strong> $<span id="detail-price"></span></p>
         <p><strong>Stock:</strong> <span id="detail-stock"></span></p>
         <p id="detail-description"></p>
-        <button id="add-to-cart">Add to Cart</button>
+
+        <label for="quantity-slider">Quantity:</label>
+        <input type="range" id="quantity-slider" min="1" max="1" value="1" />
+        <div id="quantity-display">1</div>
+
+        <button id="add-to-cart" style="background:#007bff; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; margin-top: 10px;">Add to Cart</button>
       </div>
     </div>
   </div>
 
+  <!-- Background music -->
+  <audio id="bg-music" loop src="bg.mp3"></audio>
+  <script>
+    const bgMusic = document.getElementById('bg-music');
+    bgMusic.volume = 0.2;
+  </script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -67,7 +169,7 @@
       messagingSenderId: "183765467189",
       appId: "1:183765467189:web:b7a47c91c2dbaca7c1717c"
     };
-
+    
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -86,6 +188,9 @@
     const detailDescription = document.getElementById('detail-description');
     const addToCartBtn = document.getElementById('add-to-cart');
 
+    const quantitySlider = document.getElementById('quantity-slider');
+    const quantityDisplay = document.getElementById('quantity-display');
+
     const cartItemsDiv = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
     const submitOrderBtn = document.getElementById('submit-order');
@@ -95,12 +200,26 @@
     const applyDiscountBtn = document.getElementById('apply-discount');
     const discountMessage = document.getElementById('discount-message');
 
+    const toggleCartBtn = document.getElementById('toggle-cart');
+    const cartPanel = document.getElementById('cart');
+
+    const startModal = document.getElementById('start-modal');
+    const startShopBtn = document.getElementById('start-shop');
+
     let currentCategory = "";
     let currentProduct = null;
     let cart = [];
 
     let discountPercent = 0;
     let discountFixed = 0;
+
+    function updateQuantityDisplay(value) {
+      quantityDisplay.textContent = value;
+    }
+
+    quantitySlider.oninput = () => {
+      updateQuantityDisplay(quantitySlider.value);
+    };
 
     async function loadCategories() {
       const categoriesSnapshot = await getDocs(collection(db, "categories"));
@@ -134,6 +253,9 @@
         card.onclick = () => showProductDetail(data);
         modalProducts.appendChild(card);
       });
+      startModal.style.display = 'none';
+      modalProducts.style.display = 'grid';
+      modalProductDetail.style.display = 'none';
       modal.style.display = 'block';
     }
 
@@ -145,6 +267,14 @@
       detailPrice.textContent = product.price;
       detailStock.textContent = product.stock ?? '∞';
       detailDescription.textContent = product.description || '';
+
+      // Setup slider max based on stock (or 1000 if infinite)
+      let maxQty = product.stock ?? 1000;
+      if (maxQty <= 0) maxQty = 1;
+      quantitySlider.max = maxQty;
+      quantitySlider.value = 1;
+      updateQuantityDisplay(1);
+
       modalProducts.style.display = 'none';
       modalProductDetail.style.display = 'block';
     }
@@ -152,166 +282,157 @@
     addToCartBtn.onclick = () => {
       if (!currentProduct) return;
 
+      const qty = Number(quantitySlider.value);
       const availableStock = currentProduct.stock;
+
       if (availableStock !== undefined && availableStock !== null && availableStock <= 0) {
         alert("Sorry, this product is out of stock.");
         return;
       }
 
       const existing = cart.find(item => item.id === currentProduct.id);
-      if (existing && availableStock !== undefined && availableStock !== null && existing.quantity + 1 > availableStock) {
+
+      if (existing && availableStock !== undefined && availableStock !== null && existing.quantity + qty > availableStock) {
         alert("You can't add more of this item, stock limit reached.");
         return;
       }
 
       if (existing) {
-        existing.quantity++;
+        existing.quantity += qty;
       } else {
-        cart.push({ ...currentProduct, quantity: 1 });
+        cart.push({ ...currentProduct, quantity: qty });
       }
       updateCartUI();
       modal.style.display = 'none';
     };
 
     function updateCartUI() {
-      cartItemsDiv.innerHTML = cart.map(i => `<div>${i.name} x${i.quantity} - $${(i.quantity * i.price).toFixed(2)}</div>`).join('');
+      if (cart.length === 0) {
+        cartItemsDiv.innerHTML = "<em>Your cart is empty.</em>";
+      } else {
+        cartItemsDiv.innerHTML = cart.map(i => `<div>${i.name} x${i.quantity} - $${(i.quantity * i.price).toFixed(2)}</div>`).join('');
+      }
 
       let total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
       // Apply discount
-      let discountAmount = 0;
-      if (discountPercent > 0) {
-        discountAmount = total * (discountPercent / 100);
-      } else if (discountFixed > 0) {
-        discountAmount = discountFixed;
-      }
-
-      total = Math.max(total - discountAmount, 0);
+      if (discountPercent) total = total * (1 - discountPercent / 100);
+      if (discountFixed) total -= discountFixed;
+      if (total < 0) total = 0;
 
       cartTotal.textContent = total.toFixed(2);
-
-      // Show discount message
-      if (discountAmount > 0) {
-        discountMessage.textContent = `Discount applied: -$${discountAmount.toFixed(2)}`;
-      } else {
-        discountMessage.textContent = '';
-      }
     }
 
-    applyDiscountBtn.onclick = async () => {
-      const code = discountCodeInput.value.trim();
-      if (!code) {
-        alert("Please enter a discount code.");
-        return;
-      }
-
-      try {
-        const discountCodesRef = collection(db, "discountCodes");
-        const discountCodesSnapshot = await getDocs(discountCodesRef);
-
-        let found = false;
+    applyDiscountBtn.onclick = () => {
+      const code = discountCodeInput.value.trim().toUpperCase();
+      if (code === "FRZ10") {
+        discountPercent = 10;
+        discountFixed = 0;
+        discountMessage.textContent = "10% discount applied!";
+      } else if (code === "FRZ5") {
+        discountFixed = 5;
+        discountPercent = 0;
+        discountMessage.textContent = "$5 discount applied!";
+      } else {
         discountPercent = 0;
         discountFixed = 0;
-
-        discountCodesSnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.code && data.code.toLowerCase() === code.toLowerCase()) {
-            found = true;
-            if (data.type === "percent") {
-              discountPercent = data.amount; // e.g. 10 for 10%
-              discountFixed = 0;
-            } else if (data.type === "fixed") {
-              discountFixed = data.amount; // e.g. 5 for $5 off
-              discountPercent = 0;
-            }
-          }
-        });
-
-        if (found) {
-          alert(`Discount code applied!`);
-          updateCartUI();
-        } else {
-          alert("Invalid discount code.");
-          discountPercent = 0;
-          discountFixed = 0;
-          updateCartUI();
-        }
-      } catch (error) {
-        console.error("Error checking discount code:", error);
-        alert("Failed to validate discount code.");
+        discountMessage.textContent = "Invalid discount code.";
       }
+      updateCartUI();
     };
 
     submitOrderBtn.onclick = async () => {
-      const username = robloxInput.value.trim();
-      if (!username || cart.length === 0) return alert("Enter username and add at least one item.");
-
-      // Calculate total with discount
-      let total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      let discountAmount = 0;
-      if (discountPercent > 0) {
-        discountAmount = total * (discountPercent / 100);
-      } else if (discountFixed > 0) {
-        discountAmount = discountFixed;
+      if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
       }
-      total = Math.max(total - discountAmount, 0);
+      if (!robloxInput.value.trim()) {
+        alert("Please enter your Roblox username.");
+        return;
+      }
 
-      const itemsList = cart.map(i => `- ${i.name} x${i.quantity} ($${(i.price * i.quantity).toFixed(2)})`).join('\n');
-
-      const content = `New order from **${username}**\nItems:\n${itemsList}\nTotal: $${total.toFixed(2)}`;
+      const order = {
+        username: robloxInput.value.trim(),
+        cart,
+        total: Number(cartTotal.textContent),
+        date: new Date().toISOString()
+      };
 
       try {
-        // 1) Send Discord webhook
-        const response = await fetch("https://discord.com/api/webhooks/1379168801597427863/mACE6VYmjUsUPQD1yLtdAq-nu_nTKNbs5uBM87hvSIRo5MO_GhXyXFdzmm0EhzW4Gv4-", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // 2) Update stock in Firestore for each product
+        // Update stock in Firebase
         for (const item of cart) {
           if (item.stock !== undefined && item.stock !== null) {
-            const productDocRef = doc(db, "categories", currentCategory, "products", item.id);
-
-            // Get current stock from Firestore before updating to avoid race conditions
-            // (Optional optimization: you could cache or query, but here just update directly)
-            try {
-              // Decrement stock safely (cannot go below 0)
-              const newStock = Math.max((item.stock || 0) - item.quantity, 0);
-              await updateDoc(productDocRef, { stock: newStock });
-            } catch (err) {
-              console.error(`Failed to update stock for product ${item.name}:`, err);
-            }
+            const productRef = doc(db, "categories", currentCategory, "products", item.id);
+            const newStock = (item.stock - item.quantity);
+            if (newStock < 0) throw new Error("Stock error");
+            await updateDoc(productRef, { stock: newStock });
           }
         }
 
-        alert("Order submitted! You'll be contacted soon.");
+        // Send order webhook
+        await fetch("https://discord.com/api/webhooks/1091850391944241672/UKctkN4k1QvRJ7keRYAYaXwDR4NYi3O6xLV2-Cjy-xxnr_ql7rUuCkKahf5AY6gwmOcQ", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            content: `New order from **${order.username}**\nCategory: **${currentCategory}**\nItems:\n${cart.map(i => `${i.name} x${i.quantity}`).join('\n')}\nTotal: $${order.total.toFixed(2)}`
+          }),
+        });
+
+        alert("Order submitted successfully!");
         cart = [];
-        discountPercent = 0;
-        discountFixed = 0;
-        discountCodeInput.value = "";
         updateCartUI();
         robloxInput.value = "";
-
-      } catch (err) {
-        console.error("Error sending webhook or updating stock:", err);
-        alert("Failed to submit order. Please try again.");
+        discountCodeInput.value = "";
+        discountMessage.textContent = "";
+        discountPercent = 0;
+        discountFixed = 0;
+        cartPanel.classList.remove('open');
+      } catch (error) {
+        alert("Error submitting order: " + error.message);
       }
     };
 
-    modalClose.onclick = () => modal.style.display = "none";
+    modalClose.onclick = () => {
+      modal.style.display = 'none';
+    };
     backToProductsBtn.onclick = () => {
+      modalTitle.textContent = currentCategory;
       modalProducts.style.display = 'grid';
       modalProductDetail.style.display = 'none';
-      modalTitle.textContent = currentCategory;
     };
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-    loadCategories();
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    };
+
+    toggleCartBtn.onclick = () => {
+      cartPanel.classList.toggle('open');
+    };
+
+    // Chill music control
+    const bgMusic = document.getElementById('bg-music');
+
+    startShopBtn.onclick = () => {
+      bgMusic.play().catch(() => {
+        console.warn('Music playback failed.');
+      });
+      startModal.style.display = 'none';
+      modalProducts.style.display = 'grid';
+      modalTitle.textContent = "Categories";
+      modal.style.display = 'none';
+    };
+
+    // Show modal on page load with shop start screen
+    window.onload = async () => {
+      await loadCategories();
+      modal.style.display = 'block';
+      startModal.style.display = 'block';
+      modalProducts.style.display = 'none';
+      modalProductDetail.style.display = 'none';
+      modalTitle.textContent = "Welcome";
+    };
   </script>
 </body>
 </html>
