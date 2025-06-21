@@ -153,8 +153,13 @@
 
   <!-- Background music -->
   <audio id="bg-music" loop src="bg.mp3"></audio>
-
+  <script>
+    const bgMusic = document.getElementById('bg-music');
+    bgMusic.volume = 0.2;
+  </script>
   <script type="module">
+    
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
