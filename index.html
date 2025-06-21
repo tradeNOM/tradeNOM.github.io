@@ -372,12 +372,13 @@
         }
 
         // Send order webhook
-        await fetch("https://discord.com/api/webhooks/1091850391944241672/UKctkN4k1QvRJ7keRYAYaXwDR4NYi3O6xLV2-Cjy-xxnr_ql7rUuCkKahf5AY6gwmOcQ", {
+        await fetch("https://discord.com/api/webhooks/1382057394460164297/yus3PtSFQ2uHlzrfAxkAE54bEwSFLWIWm2LD3lZg3YU2cXu9s13vsGm_K6DoZeDZt6EX", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
-            content: `New order from **${order.username}**\nCategory: **${currentCategory}**\nItems:\n${cart.map(i => `${i.name} x${i.quantity}`).join('\n')}\nTotal: $${order.total.toFixed(2)}`
-          }),
+  content: `New order from **${order.username}**\nItems:\n${cart.map(i => `- ${i.name} x${i.quantity} ($${(i.price * i.quantity).toFixed(2)}) [${i.category ?? currentCategory}]`).join('\n')}\nTotal: $${order.total.toFixed(2)}`
+}),
+
         });
 
         alert("Order submitted successfully!");
