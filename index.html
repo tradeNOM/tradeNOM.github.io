@@ -15,88 +15,16 @@
     .modal-content { margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; background: #111; border-radius: 8px; color: white; }
     .close { float: right; font-size: 28px; cursor: pointer; }
     .modal-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-    button#toggle-cart {
-      margin-top: 10px;
-      padding: 10px 16px;
-      font-size: 16px;
-      border-radius: 6px;
-      background: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      position: absolute;
-      right: 20px;
-      top: 20px;
-    }
-
-    .cart-panel {
-      position: fixed;
-      top: 0;
-      right: -350px;
-      width: 300px;
-      height: 100%;
-      background: #111;
-      color: white;
-      padding: 20px;
-      box-shadow: -4px 0 10px rgba(0,0,0,0.5);
-      transition: right 0.3s ease-in-out;
-      z-index: 1000;
-      border-radius: 12px 0 0 12px;
-      overflow-y: auto;
-    }
-    .cart-panel.open {
-      right: 0;
-    }
-    .cart-panel input, .cart-panel button {
-      width: 100%;
-      margin-top: 12px;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: none;
-    }
-    .cart-panel button {
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    .cart-panel h2, .cart-panel p {
-      margin: 10px 0;
-    }
-
-    /* Quantity slider styles */
-    #quantity-slider {
-      width: 100%;
-      margin-top: 10px;
-      -webkit-appearance: none;
-      background: #333;
-      height: 6px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #quantity-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #007bff;
-      cursor: pointer;
-      margin-top: -6px;
-    }
-    #quantity-slider::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #007bff;
-      cursor: pointer;
-    }
-
-    #quantity-display {
-      margin-top: 8px;
-      font-weight: bold;
-      text-align: center;
-    }
+    button#toggle-cart { margin-top: 10px; padding: 10px 16px; font-size: 16px; border-radius: 6px; background: #007bff; color: white; border: none; cursor: pointer; position: absolute; right: 20px; top: 20px; }
+    .cart-panel { position: fixed; top: 0; right: -350px; width: 300px; height: 100%; background: #111; color: white; padding: 20px; box-shadow: -4px 0 10px rgba(0,0,0,0.5); transition: right 0.3s ease-in-out; z-index: 1000; border-radius: 12px 0 0 12px; overflow-y: auto; }
+    .cart-panel.open { right: 0; }
+    .cart-panel input, .cart-panel button { width: 100%; margin-top: 12px; padding: 10px; font-size: 14px; border-radius: 6px; border: none; }
+    .cart-panel button { background: #007bff; color: white; cursor: pointer; }
+    .cart-panel h2, .cart-panel p { margin: 10px 0; }
+    #quantity-slider { width: 100%; margin-top: 10px; -webkit-appearance: none; background: #333; height: 6px; border-radius: 4px; cursor: pointer; }
+    #quantity-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #007bff; cursor: pointer; margin-top: -6px; }
+    #quantity-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #007bff; cursor: pointer; }
+    #quantity-display { margin-top: 8px; font-weight: bold; text-align: center; }
   </style>
 </head>
 <body>
@@ -123,17 +51,11 @@
     <div class="modal-content">
       <span id="modal-close" class="close">&times;</span>
       <h2 id="modal-title"></h2>
-
-      <!-- Shop start modal -->
       <div id="start-modal" style="text-align:center; margin-top: 40px;">
         <p>Welcome to Frozone Store! Press the button below to start shopping</p>
         <button id="start-shop" style="padding:12px 24px; font-size: 18px; border-radius: 8px; background:#007bff; color:white; border:none; cursor:pointer;">Start Shopping</button>
       </div>
-
-      <!-- Products grid -->
       <div id="modal-products" class="modal-products" style="display:none;"></div>
-
-      <!-- Product detail -->
       <div id="modal-product-detail" style="display:none; color: white;">
         <button id="back-to-products" style="background:#444; border:none; color:white; padding:6px 12px; border-radius:6px; cursor:pointer;">← Back to products</button>
         <h3 id="detail-name"></h3>
@@ -141,28 +63,21 @@
         <p><strong>Price:</strong> $<span id="detail-price"></span></p>
         <p><strong>Stock:</strong> <span id="detail-stock"></span></p>
         <p id="detail-description"></p>
-
         <label for="quantity-slider">Quantity:</label>
         <input type="range" id="quantity-slider" min="1" max="1" value="1" />
         <div id="quantity-display">1</div>
-
         <button id="add-to-cart" style="background:#007bff; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; margin-top: 10px;">Add to Cart</button>
       </div>
     </div>
   </div>
 
-  <!-- Background music -->
   <audio id="bg-music" loop src="bg.mp3"></audio>
-  <script>
-    const bgMusic = document.getElementById('bg-music');
-    bgMusic.volume = 0.2;
-  </script>
-  <script type="module">
-    
 
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
+    // ——— REPLACE THIS CONFIG ———
     const firebaseConfig = {
       apiKey: "AIzaSyAveoEg2mxueUIezZfPlvnRj28JKZD13KE",
       authDomain: "frozo-3ba69.firebaseapp.com",
@@ -171,6 +86,7 @@
       messagingSenderId: "183765467189",
       appId: "1:183765467189:web:b7a47c91c2dbaca7c1717c"
     };
+    // ————————————————————————
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -211,53 +127,44 @@
     let currentCategory = "";
     let currentProduct = null;
     let cart = [];
-
     let discountPercent = 0;
     let discountFixed = 0;
 
     function updateQuantityDisplay(value) {
       quantityDisplay.textContent = value;
     }
-
-    quantitySlider.oninput = () => {
-      updateQuantityDisplay(quantitySlider.value);
-    };
+    quantitySlider.oninput = () => updateQuantityDisplay(quantitySlider.value);
 
     async function loadCategories() {
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const snap = await getDocs(collection(db, "categories"));
       categoryList.innerHTML = '';
-      categoriesSnapshot.forEach(doc => {
+      snap.forEach(docSnap => {
         const div = document.createElement('div');
         div.className = 'category-card';
-        div.textContent = doc.id;
-        div.onclick = () => openCategoryModal(doc.id);
+        div.textContent = docSnap.id;
+        div.onclick = () => openCategoryModal(docSnap.id);
         categoryList.appendChild(div);
       });
     }
 
-    async function openCategoryModal(categoryId) {
-      currentCategory = categoryId;
-      modalTitle.textContent = categoryId;
-      modalProducts.innerHTML = 'Loading...';
-      modalProducts.style.display = 'grid';
+    async function openCategoryModal(catId) {
+      currentCategory = catId;
+      modalTitle.textContent = catId;
+      modalProducts.innerHTML = 'Loading...'; modalProducts.style.display = 'grid';
       modalProductDetail.style.display = 'none';
 
-      const productsRef = collection(db, "categories", categoryId, "products");
-      const productsSnapshot = await getDocs(productsRef);
-
+      const productsSnap = await getDocs(collection(db, "categories", catId, "products"));
       modalProducts.innerHTML = '';
-      productsSnapshot.forEach(doc => {
-        const data = doc.data();
-        data.id = doc.id; // add doc id to product data for identification
+      productsSnap.forEach(docSnap => {
+        const data = docSnap.data(); data.id = docSnap.id;
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `<img src="${data.image}" alt="${data.name}" /><h4>${data.name}</h4><p>$${data.price}</p>`;
         card.onclick = () => showProductDetail(data);
         modalProducts.appendChild(card);
       });
+
       startModal.style.display = 'none';
-      modalProducts.style.display = 'grid';
-      modalProductDetail.style.display = 'none';
       modal.style.display = 'block';
     }
 
@@ -269,32 +176,25 @@
       detailPrice.textContent = product.price;
       detailStock.textContent = product.stock ?? '∞';
       detailDescription.textContent = product.description || '';
-
-      // Setup slider max based on stock (or 1000 if infinite)
-      let maxQty = product.stock ?? 1000;
-      if (maxQty <= 0) maxQty = 1;
+      const maxQty = (product.stock ?? 1000) > 0 ? (product.stock ?? 1000) : 1;
       quantitySlider.max = maxQty;
       quantitySlider.value = 1;
       updateQuantityDisplay(1);
-
       modalProducts.style.display = 'none';
       modalProductDetail.style.display = 'block';
     }
 
     addToCartBtn.onclick = () => {
       if (!currentProduct) return;
-
       const qty = Number(quantitySlider.value);
       const availableStock = currentProduct.stock;
+      const existing = cart.find(item => item.id === currentProduct.id && item.category === currentCategory);
 
-      if (availableStock !== undefined && availableStock !== null && availableStock <= 0) {
+      if (availableStock !== undefined && availableStock <= 0) {
         alert("Sorry, this product is out of stock.");
         return;
       }
-
-      const existing = cart.find(item => item.id === currentProduct.id);
-
-      if (existing && availableStock !== undefined && availableStock !== null && existing.quantity + qty > availableStock) {
+      if (existing && availableStock !== undefined && existing.quantity + qty > availableStock) {
         alert("You can't add more of this item, stock limit reached.");
         return;
       }
@@ -302,56 +202,42 @@
       if (existing) {
         existing.quantity += qty;
       } else {
-        cart.push({ ...currentProduct, quantity: qty });
+        cart.push({ ...currentProduct, quantity: qty, category: currentCategory });
       }
+
       updateCartUI();
       modal.style.display = 'none';
     };
 
     function updateCartUI() {
-      if (cart.length === 0) {
-        cartItemsDiv.innerHTML = "<em>Your cart is empty.</em>";
-      } else {
-        cartItemsDiv.innerHTML = cart.map(i => `<div>${i.name} x${i.quantity} - $${(i.quantity * i.price).toFixed(2)}</div>`).join('');
-      }
+      cartItemsDiv.innerHTML = cart.length
+        ? cart.map(i => `<div>${i.name} x${i.quantity} - $${(i.quantity * i.price).toFixed(2)}</div>`).join('')
+        : "<em>Your cart is empty.</em>";
 
       let total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-      // Apply discount
-      if (discountPercent) total = total * (1 - discountPercent / 100);
+      if (discountPercent) total *= (1 - discountPercent / 100);
       if (discountFixed) total -= discountFixed;
-      if (total < 0) total = 0;
-
-      cartTotal.textContent = total.toFixed(2);
+      cartTotal.textContent = total < 0 ? '0.00' : total.toFixed(2);
     }
 
     applyDiscountBtn.onclick = () => {
       const code = discountCodeInput.value.trim().toUpperCase();
       if (code === "FRZ10") {
-        discountPercent = 10;
-        discountFixed = 0;
+        discountPercent = 10; discountFixed = 0;
         discountMessage.textContent = "10% discount applied!";
       } else if (code === "FRZ5") {
-        discountFixed = 5;
-        discountPercent = 0;
+        discountFixed = 5; discountPercent = 0;
         discountMessage.textContent = "$5 discount applied!";
       } else {
-        discountPercent = 0;
-        discountFixed = 0;
         discountMessage.textContent = "Invalid discount code.";
+        discountPercent = discountFixed = 0;
       }
       updateCartUI();
     };
 
     submitOrderBtn.onclick = async () => {
-      if (cart.length === 0) {
-        alert("Your cart is empty.");
-        return;
-      }
-      if (!robloxInput.value.trim()) {
-        alert("Please enter your Roblox username.");
-        return;
-      }
+      if (!cart.length) return alert("Your cart is empty.");
+      if (!robloxInput.value.trim()) return alert("Please enter your Roblox username.");
 
       const order = {
         username: robloxInput.value.trim(),
@@ -361,73 +247,55 @@
       };
 
       try {
-        // Update stock in Firebase
         for (const item of cart) {
-          if (item.stock !== undefined && item.stock !== null) {
-            const productRef = doc(db, "categories", currentCategory, "products", item.id);
-            const newStock = (item.stock - item.quantity);
+          if (item.stock != null) {
+            const productRef = doc(db, "categories", item.category, "products", item.id);
+            const newStock = item.stock - item.quantity;
             if (newStock < 0) throw new Error("Stock error");
             await updateDoc(productRef, { stock: newStock });
           }
         }
 
-        // Send order webhook
         await fetch("https://discord.com/api/webhooks/1379168801597427863/mACE6VYmjUsUPQD1yLtdAq-nu_nTKNbs5uBM87hvSIRo5MO_GhXyXFdzmm0EhzW4Gv4-", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-  content: `New order from **${order.username}**\nItems:\n${cart.map(i => `- ${i.name} x${i.quantity} ($${(i.price * i.quantity).toFixed(2)}) [${i.category ?? currentCategory}]`).join('\n')}\nTotal: $${order.total.toFixed(2)}`
-}),
-
+            content: `New order from **${order.username}**\nItems:\n${order.cart.map(i => `- ${i.name} x${i.quantity} ($${(i.price*i.quantity).toFixed(2)}) [${i.category}]`).join('\n')}\nTotal: $${order.total.toFixed(2)}`
+          })
         });
 
         alert("Order submitted successfully!");
-        cart = [];
-        updateCartUI();
+        cart = []; updateCartUI();
         robloxInput.value = "";
-        discountCodeInput.value = "";
-        discountMessage.textContent = "";
-        discountPercent = 0;
-        discountFixed = 0;
+        discountCodeInput.value = ""; discountMessage.textContent = "";
+        discountPercent = discountFixed = 0;
         cartPanel.classList.remove('open');
-      } catch (error) {
-        alert("Error submitting order: " + error.message);
+      } catch (err) {
+        alert("Error submitting order: " + err.message);
       }
     };
 
-    modalClose.onclick = () => {
-      modal.style.display = 'none';
-    };
+    modalClose.onclick = () => modal.style.display = 'none';
     backToProductsBtn.onclick = () => {
       modalTitle.textContent = currentCategory;
       modalProducts.style.display = 'grid';
       modalProductDetail.style.display = 'none';
     };
 
-    window.onclick = (event) => {
-      if (event.target == modal) {
-        modal.style.display = 'none';
-      }
+    window.onclick = event => {
+      if (event.target === modal) modal.style.display = 'none';
     };
 
-    toggleCartBtn.onclick = () => {
-      cartPanel.classList.toggle('open');
-    };
-
-    // Chill music control
-    const bgMusic = document.getElementById('bg-music');
+    toggleCartBtn.onclick = () => cartPanel.classList.toggle('open');
 
     startShopBtn.onclick = () => {
-      bgMusic.play().catch(() => {
-        console.warn('Music playback failed.');
-      });
+      document.getElementById('bg-music').play().catch(() => console.warn('Music fail'));
       startModal.style.display = 'none';
       modalProducts.style.display = 'grid';
       modalTitle.textContent = "Categories";
       modal.style.display = 'none';
     };
 
-    // Show modal on page load with shop start screen
     window.onload = async () => {
       await loadCategories();
       modal.style.display = 'block';
