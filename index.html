@@ -6,12 +6,72 @@
   <title>Frozone Store</title>
   <link rel="stylesheet" href="style.css" />
   <script async src="https://js.stripe.com/v3/buy-button.js"></script>
-  <style>
-    /* [Truncated for brevity — same CSS as your original, no changes needed] */
+   <style>
+    body { font-family: sans-serif; margin: 0; color: white; background: #000b19; }
+    header { text-align: center; padding: 20px; position: relative; }
+    .category-card, .product-card { background: #111; margin: 10px; padding: 10px; cursor: pointer; border-radius: 8px; text-align: center; }
+    .product-card img { max-width: 100px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); overflow: auto; z-index: 20; }
+    .modal-content { margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; background: #111; border-radius: 8px; color: white; }
+    .close { float: right; font-size: 28px; cursor: pointer; }
+    .modal-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    button#toggle-cart { margin-top: 10px; padding: 10px 16px; font-size: 16px; border-radius: 6px; background: #007bff; color: white; border: none; cursor: pointer; position: absolute; right: 20px; top: 20px; }
+    .cart-panel { position: fixed; top: 0; right: -350px; width: 300px; height: 100%; background: #111; color: white; padding: 20px; box-shadow: -4px 0 10px rgba(0,0,0,0.5); transition: right 0.3s ease-in-out; z-index: 1000; border-radius: 12px 0 0 12px; overflow-y: auto; }
+    .cart-panel.open { right: 0; }
+    .cart-panel input, .cart-panel button { width: 100%; margin-top: 12px; padding: 10px; font-size: 14px; border-radius: 6px; border: none; }
+    .cart-panel button { background: #007bff; color: white; cursor: pointer; }
+    .cart-panel h2, .cart-panel p { margin: 10px 0; }
+    #quantity-slider { width: 100%; margin-top: 10px; -webkit-appearance: none; background: #333; height: 6px; border-radius: 4px; cursor: pointer; }
+    #quantity-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #007bff; cursor: pointer; margin-top: -6px; }
+    #quantity-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #007bff; cursor: pointer; }
+    #quantity-display { margin-top: 8px; font-weight: bold; text-align: center; }
   </style>
 </head>
 <body>
-  <!-- [HTML Layout – same as before, no change needed] -->
+  <header>
+    <h1>Frozone Store</h1>
+    <h3>Your #1 Source for Axes</h3>
+    <button id="toggle-cart">🛒 View Cart</button>
+  </header>
+
+  <section class="categories" id="category-list"></section>
+
+  <div class="cart-panel" id="cart">
+    <h2>🛒 Your Cart</h2>
+    <div id="cart-items"></div>
+    <input type="text" id="discount-code" placeholder="Discount Code" />
+    <button id="apply-discount">Apply Discount</button>
+    <p id="discount-message" style="color: lightgreen;"></p>
+    <p>Total: <strong id="cart-total">0</strong></p>
+    <input type="text" id="roblox-username" placeholder="Your Roblox Username" required />
+    <button id="submit-order">Submit Order</button>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="modal-close" class="close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <div id="start-modal" style="text-align:center; margin-top: 40px;">
+        <p>Welcome to Frozone Store! Press the button below to start shopping</p>
+        <button id="start-shop" style="padding:12px 24px; font-size: 18px; border-radius: 8px; background:#007bff; color:white; border:none; cursor:pointer;">Start Shopping</button>
+      </div>
+      <div id="modal-products" class="modal-products" style="display:none;"></div>
+      <div id="modal-product-detail" style="display:none; color: white;">
+        <button id="back-to-products" style="background:#444; border:none; color:white; padding:6px 12px; border-radius:6px; cursor:pointer;">← Back to products</button>
+        <h3 id="detail-name"></h3>
+        <img id="detail-image" src="" alt="" style="max-width:100%; border-radius: 8px;" />
+        <p><strong>Price:</strong> $<span id="detail-price"></span></p>
+        <p><strong>Stock:</strong> <span id="detail-stock"></span></p>
+        <p id="detail-description"></p>
+        <label for="quantity-slider">Quantity:</label>
+        <input type="range" id="quantity-slider" min="1" max="1" value="1" />
+        <div id="quantity-display">1</div>
+        <button id="add-to-cart" style="background:#007bff; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; margin-top: 10px;">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bg-music" loop src="bg.mp3"></audio>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
