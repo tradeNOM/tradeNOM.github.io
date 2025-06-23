@@ -76,6 +76,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app-check.js";
 
     // ——— REPLACE THIS CONFIG ———
     const firebaseConfig = {
@@ -86,9 +87,14 @@
       messagingSenderId: "183765467189",
       appId: "1:183765467189:web:b7a47c91c2dbaca7c1717c"
     };
-    // ————————————————————————
 
     const app = initializeApp(firebaseConfig);
+
+    // ——— ADD THIS: App Check Initialization ———
+    const appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider('6LeejGorAAAAABVrW3cng4Mt_7EVn5MtyHqtdoTK'),
+      isTokenAutoRefreshEnabled: true
+    });
     const db = getFirestore(app);
 
     const categoryList = document.getElementById('category-list');
