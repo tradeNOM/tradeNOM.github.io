@@ -1,1 +1,104 @@
-my router broke, no orders will get sent to me at the time
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>No-login Encrypted IRC</title>
+</head>
+<body>
+<h3>No-login Encrypted IRC — Working Demo</h3>
+
+<div>
+Room ID: <input id="room" value="1036">
+Nickname: <input id="nick" value="">
+Room passphrase: <input id="pass" type="password" value="">
+<button id="join">Join</button>
+</div>
+
+<div id="chat" style="display:none">
+  <div id="log" style="width:700px;height:300px;border:1px solid #ccc;overflow:auto;padding:6px"></div>
+  <textarea id="msg" rows="3" cols="80"></textarea><br>
+  TTL (s): <input id="ttl" type="number" value="60" style="width:80px">
+  <button id="send">Send</button>
+</div>
+
+<script type="module">
+import sodium from 'https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.10/+esm';
+await sodium.ready;
+
+let ws = null;
+let key = null;
+let alias = null;
+
+// Helpers
+const u8ToB64 = u8 => btoa(String.fromCharCode(...u8));
+const b64ToU8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+function appendLog(html){ const el=document.getElementById('log'); el.innerHTML+=html+'<br>'; el.scrollTop=el.scrollHeight; }
+
+// derive key consistently with 16-byte salt
+function deriveKey(passphrase, roomId){
+  const saltStr = 'room-salt-' + roomId;
+  const saltBytes = sodium.crypto_generichash(sodium.crypto_pwhash_SALTBYTES, sodium.from_string(saltStr));
+  return sodium.crypto_pwhash(
+    32,
+    passphrase,
+    saltBytes,
+    sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+    sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+    sodium.crypto_pwhash_ALG_DEFAULT
+  );
+}
+
+// join room
+document.getElementById('join').onclick = () => {
+  const room = document.getElementById('room').value || '1036';
+  alias = document.getElementById('nick').value || `guest-${Math.floor(Math.random()*10000)}`;
+  const pass = document.getElementById('pass').value || '';
+  key = deriveKey(pass, room);
+
+  ws = new WebSocket(`wss://netspace.onrender.com/room/${room}`);
+  ws.onopen = () => {
+    document.getElementById('chat').style.display = 'block';
+    appendLog(`<em>Connected as ${alias} to room ${room}</em>`);
+    ws.send(JSON.stringify({ type:'join', alias }));
+  };
+  ws.onmessage = ev => {
+    try {
+      const data = JSON.parse(ev.data);
+      if(data.type === 'backlog'){ data.messages.forEach(handleMessage); }
+      else if(data.type === 'msg'){ handleMessage(data.message); }
+    } catch(e){}
+  };
+  ws.onclose = () => appendLog('<em>Disconnected</em>');
+};
+
+// handle incoming message
+function handleMessage(item){
+  try {
+    const obj = JSON.parse(item.ciphertext);
+    const ct = b64ToU8(obj.data);
+    const nonce = b64ToU8(obj.nonce);
+    const pt = sodium.crypto_secretbox_open_easy(ct, nonce, key);
+    const text = sodium.to_string(pt);
+    appendLog(`<b>${item.alias}</b>: ${text} <small style="color:gray">(${new Date(item.expiry_ts).toLocaleTimeString()})</small>`);
+  } catch(e){
+    appendLog(`<span style="color:orange"><b>${item.alias}</b>: [unable to decrypt]</span>`);
+  }
+}
+
+// send message
+document.getElementById('send').onclick = () => {
+  if(!ws || ws.readyState !== WebSocket.OPEN){ alert('Not connected'); return; }
+  const text = document.getElementById('msg').value || '';
+  const ttl = parseInt(document.getElementById('ttl').value) || 60;
+
+  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+  const ct = sodium.crypto_secretbox_easy(sodium.from_string(text), nonce, key);
+
+  const payload = { data: u8ToB64(ct), nonce: u8ToB64(nonce) };
+  ws.send(JSON.stringify({ type:'msg', ciphertext: JSON.stringify(payload), ttl }));
+
+  document.getElementById('msg').value = '';
+};
+</script>
+</body>
+</html>
