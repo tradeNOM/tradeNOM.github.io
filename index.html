@@ -229,12 +229,11 @@ let ws = null;
 let key = null;
 let alias = null;
 
-// Helpers
+
 const u8ToB64 = u8 => btoa(String.fromCharCode(...u8));
 const b64ToU8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 function appendLog(html){ const el=document.getElementById('log'); el.innerHTML+=html+'<br>'; el.scrollTop=el.scrollHeight; }
 
-// derive key consistently with 16-byte salt
 function deriveKey(passphrase, roomId){
   const saltStr = 'room-salt-' + roomId;
   const saltBytes = sodium.crypto_generichash(sodium.crypto_pwhash_SALTBYTES, sodium.from_string(saltStr));
@@ -248,7 +247,6 @@ function deriveKey(passphrase, roomId){
   );
 }
 
-// join room
 document.getElementById('join').onclick = () => {
   const room = document.getElementById('room').value || '1036';
   alias = document.getElementById('nick').value || `guest-${Math.floor(Math.random()*10000)}`;
@@ -270,8 +268,6 @@ document.getElementById('join').onclick = () => {
   };
   ws.onclose = () => appendLog('<em style="color:var(--muted)">Disconnected</em>');
 };
-
-// handle incoming message
 function handleMessage(item){
   try {
     const obj = JSON.parse(item.ciphertext);
@@ -286,7 +282,6 @@ function handleMessage(item){
   }
 }
 
-// send message
 document.getElementById('send').onclick = () => {
   if(!ws || ws.readyState !== WebSocket.OPEN){ alert('Not connected'); return; }
   const text = document.getElementById('msg').value || '';
