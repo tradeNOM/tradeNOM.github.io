@@ -2,23 +2,223 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>netspace</title>
+<title>Netspace - fully anonymous IRC</title>
+<style>
+  :root{
+    --bg:#050507;
+    --panel:#0b0b0c;
+    --neon-green:#00ff66;
+    --neon-red:#ff0055;
+    --accent:#00d1ff;
+    --muted:#9aa1a6;
+    --glass: rgba(255,255,255,0.03);
+  }
+
+  /* Page base */
+  html,body{height:100%;margin:0;background:var(--bg);font-family: "Share Tech Mono", "Courier New", monospace;color:var(--neon-green);-webkit-font-smoothing:antialiased}
+  body{display:flex;align-items:flex-start;justify-content:center;padding:28px 20px 40px}
+
+  /* Aggressive cracked background using layered SVG noise + CSS lines */
+  body::before{
+    content:"";
+    position:fixed;inset:0;z-index:0;
+    background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(255,10,80,0.03), transparent 6%),
+      radial-gradient(900px 400px at 90% 90%, rgba(0,255,150,0.02), transparent 8%),
+      linear-gradient(180deg, rgba(0,0,0,0.6), transparent 40%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 6px);
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+
+  /* Crack overlay (SVG path repeated via data URI) */
+  body::after{
+    content:"";
+    position:fixed;inset:0;z-index:1;
+    background-image:
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><g stroke="%2300ff66" opacity="0.06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M50 120 L200 160 L280 90 L360 150 L480 120 L600 220 L720 160 L840 240 L980 200" /><path d="M120 300 L240 260 L320 320 L420 280 L540 340 L640 300 L780 360 L920 320" /><path d="M40 600 L160 540 L260 600 L420 560 L560 640 L700 580 L820 640 L980 600" /></g></svg>');
+    background-repeat:repeat;
+    mix-blend-mode:overlay;
+    filter:blur(0.6px) contrast(120%);
+    pointer-events:none;
+    transform:scale(1.2);
+  }
+
+  /* Container */
+  .wrap{position:relative;z-index:5;max-width:980px;width:100%;display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+
+  /* Left control panel - aggressive shard edges */
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04);
+    padding:20px;border-radius:8px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.7), inset 0 0 30px rgba(0,0,0,0.6);
+    transform:skewY(-1deg);
+    position:relative;overflow:hidden;
+  }
+
+  /* jagged edge effect using pseudo element */
+  .panel::before{
+    content:"";
+    position:absolute;left:-40px;top:-30px;width:200%;height:40%;
+    background:linear-gradient(90deg, transparent 10%, rgba(255,0,85,0.04) 50%, transparent 90%);
+    transform:skewY(-6deg);
+    pointer-events:none;
+  }
+
+  h3{margin:0 0 12px 0;color:var(--neon-red);text-shadow:0 0 8px rgba(255,0,85,0.15), 0 0 20px rgba(255,0,85,0.06);letter-spacing:1px;font-size:18px}
+
+  label{display:block;color:var(--muted);font-size:12px;margin-top:8px}
+
+  input[type="text"], input[type="password"], input[type="number"]{
+    width:100%;box-sizing:border-box;padding:10px 12px;margin-top:6px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    border:1px solid rgba(0,255,102,0.08);color:var(--neon-green);outline:none;border-radius:4px;font-family:inherit;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.6);
+  }
+
+  input::placeholder{color:rgba(150,200,160,0.12)}
+
+  .btn{
+    display:inline-block;padding:10px 14px;margin-top:12px;border-radius:5px;border:1px solid rgba(255,255,255,0.06);
+    background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(255,255,255,0.02));
+    color:var(--neon-green);cursor:pointer;font-weight:700;letter-spacing:0.6px;
+    text-transform:uppercase;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,0.8);
+    transition:all .14s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(0,0,0,0.85), 0 0 18px rgba(0,255,150,0.05)}
+  .btn:active{transform:translateY(0)}
+
+  /* Right main chat area - aggressive fractured look */
+  .chat {
+    background:linear-gradient(180deg, rgba(10,10,10,0.96), rgba(6,6,6,0.9));
+    border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.02);
+    position:relative;overflow:hidden;
+  }
+
+  /* top broken glass sheen */
+  .chat::after{
+    content:"";position:absolute;left:-10%;top:-20%;width:120%;height:40%;
+    background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.001));
+    transform:rotate(-6deg) skewX(-6deg);
+    mix-blend-mode:overlay;pointer-events:none;
+  }
+
+  #log{
+    width:100%;height:420px;border-radius:6px;padding:14px;box-sizing:border-box;overflow:auto;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.6), rgba(10,10,10,0.6)),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 6px);
+    border: 1px solid rgba(0,255,102,0.06);
+    color:var(--neon-green);font-size:13px;line-height:1.38;
+    text-shadow:0 1px 0 rgba(0,0,0,0.9);
+  }
+
+  /* jagged top-left visual shard */
+  .chat .shard{
+    position:absolute;left:-40px;top:20px;width:120px;height:120px;border-radius:4px;
+    background:linear-gradient(135deg, rgba(255,0,80,0.02), rgba(0,255,120,0.01));
+    transform:rotate(-18deg) skewY(-8deg);
+    box-shadow:0 8px 30px rgba(0,0,0,0.7);
+    pointer-events:none;
+  }
+
+  textarea#msg{width:100%;min-height:88px;padding:12px;border-radius:6px;border:1px solid rgba(0,255,102,0.06);background:rgba(0,0,0,0.6);color:var(--neon-green);resize:vertical;font-family:inherit}
+
+  .controls{display:flex;gap:10px;align-items:center;margin-top:10px}
+  .ttl{width:120px;padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted)}
+
+  .send-btn{padding:10px 16px;border-radius:6px;background:linear-gradient(180deg,var(--neon-red),#a3003f);color:white;border:none;font-weight:800;cursor:pointer;letter-spacing:0.6px;box-shadow:0 10px 30px rgba(163,0,63,0.28)}
+  .send-btn:hover{transform:translateY(-2px);box-shadow:0 30px 60px rgba(163,0,63,0.28)}
+
+  /* message lines */
+  .msg-row{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.02);display:flex;gap:10px;align-items:flex-start}
+  .msg-row b{display:inline-block;min-width:120px;color:var(--accent);text-shadow:0 0 6px rgba(0,209,255,0.08);font-weight:800;position:relative}
+  .msg-row b.glitch{
+    animation:glitch 2.6s infinite;
+    color:var(--neon-red);
+    text-shadow: 0 0 6px rgba(255,0,85,0.2), -2px 0 6px rgba(0,255,120,0.04);
+  }
+  .msg-text{flex:1;color:var(--neon-green)}
+  .msg-meta{font-size:11px;color:var(--muted);min-width:120px;text-align:right}
+
+  @keyframes glitch{
+    0%{transform:none}
+    10%{transform:translate(-1px,0)}
+    20%{transform:translate(1px,-1px)}
+    30%{transform:translate(-1px,1px)}
+    100%{transform:none}
+  }
+
+  /* unable to decrypt style — aggressive red */
+  .bad{color:rgba(255,80,80,1);font-weight:900;text-shadow:0 0 8px rgba(255,20,60,0.12)}
+
+  /* Logo styling */
+  .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .logo img {
+    max-width: 400px;
+    height: auto;
+    padding: 4px;
+  }
+
+  /* small screens */
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr;gap:12px}
+    .panel{order:2}
+    .chat{order:1}
+    #log{height:320px}
+  }
+</style>
 </head>
 <body>
-<h3>netspace - Demo</h3>
+<div class="wrap">
+  <div class="panel" style="max-width:360px">
+    <!-- Logo -->
+    <div class="logo">
+      <img src="logo.png" alt="NetSpace Logo">
+    </div>
 
-<div>
-Room ID: <input id="room" value="1036">
-Nickname: <input id="nick" value="">
-Room passphrase: <input id="pass" type="password" value="">
-<button id="join">Join</button>
-</div>
+    <h3>NetSpace</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">fully anonymous IRC - WIP</div>
 
-<div id="chat" style="display:none">
-  <div id="log" style="width:700px;height:300px;border:1px solid #ccc;overflow:auto;padding:6px"></div>
-  <textarea id="msg" rows="3" cols="80"></textarea><br>
-  TTL (s): <input id="ttl" type="number" value="60" style="width:80px">
-  <button id="send">Send</button>
+    <label>Room ID
+      <input id="room" type="text" value="1036" />
+    </label>
+
+    <label>Nickname
+      <input id="nick" type="text" placeholder="anonymous" />
+    </label>
+
+    <label>Room passphrase (cipher)
+      <input id="pass" type="password" placeholder="leave empty for guest" />
+    </label>
+
+    <button id="join" class="btn">Join</button>
+
+    <div style="margin-top:14px;border-top:1px dashed rgba(255,255,255,0.02);padding-top:12px;color:var(--muted);font-size:12px">
+      <div><strong style="color:var(--neon-green)">No-login</strong> • End-to-end ephemeral messages</div>
+      <div style="margin-top:6px">TTL sets expiry — messages vanish server-side when expired.</div>
+    </div>
+  </div>
+
+  <div class="chat">
+    <div class="shard"></div>
+    <div id="log" aria-live="polite"></div>
+
+    <textarea id="msg" rows="4" placeholder="Type a message — be loud or be gone"></textarea>
+
+    <div class="controls">
+      <p>TTL:</p><input id="ttl" class="ttl" type="number" value="60" title="Time to live in seconds" />
+      <div style="flex:1"></div>
+      <button id="send" class="send-btn">Send</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -57,8 +257,8 @@ document.getElementById('join').onclick = () => {
 
   ws = new WebSocket(`wss://netspace.onrender.com/room/${room}`);
   ws.onopen = () => {
-    document.getElementById('chat').style.display = 'block';
-    appendLog(`<em>Connected as ${alias} to room ${room}</em>`);
+    document.querySelector('.chat').scrollIntoView({behavior:'smooth'});
+    appendLog(`<em style="color:var(--accent)">Connected as ${alias} to room ${room}</em>`);
     ws.send(JSON.stringify({ type:'join', alias }));
   };
   ws.onmessage = ev => {
@@ -68,7 +268,7 @@ document.getElementById('join').onclick = () => {
       else if(data.type === 'msg'){ handleMessage(data.message); }
     } catch(e){}
   };
-  ws.onclose = () => appendLog('<em>Disconnected</em>');
+  ws.onclose = () => appendLog('<em style="color:var(--muted)">Disconnected</em>');
 };
 
 // handle incoming message
@@ -79,9 +279,10 @@ function handleMessage(item){
     const nonce = b64ToU8(obj.nonce);
     const pt = sodium.crypto_secretbox_open_easy(ct, nonce, key);
     const text = sodium.to_string(pt);
-    appendLog(`<b>${item.alias}</b>: ${text} <small style="color:gray">(${new Date(item.expiry_ts).toLocaleTimeString()})</small>`);
+    const glitchClass = (Math.random() < 0.12) ? 'glitch' : '';
+    appendLog(`<div class="msg-row"><b class="${glitchClass}">${escapeHtml(item.alias)}</b><div class="msg-text">${escapeHtml(text)}</div><div class="msg-meta">${new Date(item.expiry_ts).toLocaleTimeString()}</div></div>`);
   } catch(e){
-    appendLog(`<span style="color:orange"><b>${item.alias}</b>: [unable to decrypt]</span>`);
+    appendLog(`<div class="msg-row bad"><b>${escapeHtml(item.alias)}</b><div class="msg-text">[unable to decrypt]</div><div class="msg-meta">${new Date(item.expiry_ts).toLocaleTimeString()}</div></div>`);
   }
 }
 
@@ -99,6 +300,15 @@ document.getElementById('send').onclick = () => {
 
   document.getElementById('msg').value = '';
 };
+
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
 </script>
 </body>
 </html>
